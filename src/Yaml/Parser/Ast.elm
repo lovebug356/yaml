@@ -31,44 +31,135 @@ fromString string =
     let
         trimmed =
             String.trim string
+
+        sign : ( Float, String )
+        sign =
+            if String.length trimmed > 1 then
+                case String.left 1 trimmed of
+                    "-" ->
+                        ( -1, String.dropLeft 1 trimmed )
+
+                    "+" ->
+                        ( 1, String.dropLeft 1 trimmed )
+
+                    _ ->
+                        ( 1, trimmed )
+
+            else
+                ( 1, trimmed )
     in
-    case String.toLower trimmed of
-        "" ->
+    case sign of
+        ( _, "" ) ->
             Null_
 
-        "null" ->
+        ( _, "~" ) ->
             Null_
 
-        "true" ->
+        ( _, "null" ) ->
+            Null_
+
+        ( _, "Null" ) ->
+            Null_
+
+        ( _, "NULL" ) ->
+            Null_
+
+        ( _, "true" ) ->
             Bool_ True
 
-        "false" ->
+        ( _, "True" ) ->
+            Bool_ True
+
+        ( _, "TRUE" ) ->
+            Bool_ True
+
+        ( _, "on" ) ->
+            Bool_ True
+
+        ( _, "On" ) ->
+            Bool_ True
+
+        ( _, "ON" ) ->
+            Bool_ True
+
+        ( _, "y" ) ->
+            Bool_ True
+
+        ( _, "Y" ) ->
+            Bool_ True
+
+        ( _, "yes" ) ->
+            Bool_ True
+
+        ( _, "Yes" ) ->
+            Bool_ True
+
+        ( _, "YES" ) ->
+            Bool_ True
+
+        ( _, "false" ) ->
             Bool_ False
 
-        ".nan" ->
+        ( _, "False" ) ->
+            Bool_ False
+
+        ( _, "FALSE" ) ->
+            Bool_ False
+
+        ( _, "off" ) ->
+            Bool_ False
+
+        ( _, "Off" ) ->
+            Bool_ False
+
+        ( _, "OFF" ) ->
+            Bool_ False
+
+        ( _, "n" ) ->
+            Bool_ False
+
+        ( _, "N" ) ->
+            Bool_ False
+
+        ( _, "no" ) ->
+            Bool_ False
+
+        ( _, "No" ) ->
+            Bool_ False
+
+        ( _, "NO" ) ->
+            Bool_ False
+
+        ( _, ".nan" ) ->
             Float_ (0 / 0)
 
-        ".inf" ->
-            Float_ (1 / 0)
+        ( _, ".NaN" ) ->
+            Float_ (0 / 0)
 
-        "+.inf" ->
-            Float_ (1 / 0)
+        ( _, ".NAN" ) ->
+            Float_ (0 / 0)
 
-        "-.inf" ->
-            Float_ (-1 / 0)
+        ( mult, ".inf" ) ->
+            Float_ (mult * 1 / 0)
 
-        other ->
-            case String.toInt other of
+        ( mult, ".Inf" ) ->
+            Float_ (mult * 1 / 0)
+
+        ( mult, ".INF" ) ->
+            Float_ (mult * 1 / 0)
+
+        _ ->
+            case String.toInt trimmed of
                 Just int ->
                     Int_ int
 
                 Nothing ->
-                    case String.toFloat other of
+                    case String.toFloat trimmed of
                         Just float ->
                             Float_ float
 
                         Nothing ->
-                            String_ trimmed
+                            String_ (String.trim trimmed)
 
 
 
@@ -80,7 +171,7 @@ toString : Value -> String
 toString value =
     case value of
         String_ string ->
-            "\"" ++ string ++ "\""
+            "\"" ++ string ++ "\" (string)"
 
         Float_ float ->
             String.fromFloat float ++ " (float)"
@@ -89,10 +180,10 @@ toString value =
             String.fromInt int ++ " (int)"
 
         List_ list ->
-            "[ " ++ String.join ", " (List.map toString list) ++ " ]"
+            "[ " ++ String.join ", " (List.map toString list) ++ " ] (list)"
 
         Record_ properties ->
-            "{ " ++ String.join ", " (List.map toStringProperty (Dict.toList properties)) ++ " }"
+            "{ " ++ String.join ", " (List.map toStringProperty (Dict.toList properties)) ++ " } (map)"
 
         Bool_ True ->
             "True (bool)"

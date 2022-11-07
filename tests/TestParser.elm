@@ -35,6 +35,10 @@ suite =
             \_ ->
                 expectValue "" <|
                     Ast.Null_
+        , Test.test "+" <|
+            \_ ->
+                expectValue "+" <|
+                    Ast.String_ "+"
         , Test.fuzz int "an int" <|
             \x ->
                 expectValue (String.fromInt x) <|

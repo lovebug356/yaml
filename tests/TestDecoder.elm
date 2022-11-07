@@ -15,7 +15,24 @@ sanitiseString s =
     let
         replaceChar : Char -> Char
         replaceChar c =
-            if List.member c [ '[', ']', '{', '}', '\'', '"', '#', ':', '-', 'Y', 'y', 'N', 'n' ] then
+            if
+                List.member c
+                    [ '['
+                    , ']'
+                    , '{'
+                    , '}'
+                    , '\''
+                    , '"'
+                    , '#'
+                    , ':'
+                    , '-'
+                    , 'Y'
+                    , 'y'
+                    , 'N'
+                    , 'n'
+                    , '~'
+                    ]
+            then
                 ' '
 
             else
@@ -33,6 +50,15 @@ sanitiseString s =
 quoteString : String -> String
 quoteString s =
     "'" ++ s ++ "'"
+
+
+interpretStr : String -> String
+interpretStr str =
+    if str == "" then
+        "null"
+
+    else
+        str
 
 
 suite : Test.Test
@@ -63,16 +89,54 @@ suite =
                 \_ -> given "True" Yaml.bool |> Expect.equal (Ok True)
             , Test.test "boolean TRUE" <|
                 \_ -> given "TRUE" Yaml.bool |> Expect.equal (Ok True)
+            , Test.test "string truE" <|
+                \_ -> given "truE" Yaml.bool |> expectFail "Expected bool, got: \"truE\" (string)"
+            , Test.test "boolean on" <|
+                \_ -> given "on" Yaml.bool |> Expect.equal (Ok True)
+            , Test.test "boolean On" <|
+                \_ -> given "On" Yaml.bool |> Expect.equal (Ok True)
+            , Test.test "string oN" <|
+                \_ -> given "oN" Yaml.bool |> expectFail "Expected bool, got: \"oN\" (string)"
+            , Test.test "boolean y" <|
+                \_ -> given "y" Yaml.bool |> Expect.equal (Ok True)
+            , Test.test "boolean Y" <|
+                \_ -> given "Y" Yaml.bool |> Expect.equal (Ok True)
+            , Test.test "boolean yes" <|
+                \_ -> given "yes" Yaml.bool |> Expect.equal (Ok True)
+            , Test.test "boolean Yes" <|
+                \_ -> given "Yes" Yaml.bool |> Expect.equal (Ok True)
+            , Test.test "string yEs" <|
+                \_ -> given "yEs" Yaml.bool |> expectFail "Expected bool, got: \"yEs\" (string)"
             , Test.test "boolean false" <|
                 \_ -> given "false" Yaml.bool |> Expect.equal (Ok False)
             , Test.test "boolean False" <|
                 \_ -> given "False" Yaml.bool |> Expect.equal (Ok False)
             , Test.test "boolean FALSE" <|
                 \_ -> given "FALSE" Yaml.bool |> Expect.equal (Ok False)
+            , Test.test "string falSe" <|
+                \_ -> given "falSe" Yaml.bool |> expectFail "Expected bool, got: \"falSe\" (string)"
+            , Test.test "boolean off" <|
+                \_ -> given "off" Yaml.bool |> Expect.equal (Ok False)
+            , Test.test "boolean Off" <|
+                \_ -> given "Off" Yaml.bool |> Expect.equal (Ok False)
+            , Test.test "string oFF" <|
+                \_ -> given "oFF" Yaml.bool |> expectFail "Expected bool, got: \"oFF\" (string)"
+            , Test.test "boolean n" <|
+                \_ -> given "n" Yaml.bool |> Expect.equal (Ok False)
+            , Test.test "boolean N" <|
+                \_ -> given "N" Yaml.bool |> Expect.equal (Ok False)
+            , Test.test "boolean no" <|
+                \_ -> given "no" Yaml.bool |> Expect.equal (Ok False)
+            , Test.test "boolean No" <|
+                \_ -> given "No" Yaml.bool |> Expect.equal (Ok False)
+            , Test.test "boolean NO" <|
+                \_ -> given "NO" Yaml.bool |> Expect.equal (Ok False)
+            , Test.test "string nO" <|
+                \_ -> given "nO" Yaml.bool |> expectFail "Expected bool, got: \"nO\" (string)"
             , Test.test "empty" <|
                 \_ -> given "" Yaml.bool |> expectFail "Expected bool, got: Null"
             , Test.test "non-boolean string" <|
-                \_ -> given "rubbish" Yaml.bool |> expectFail "Expected bool, got: \"rubbish\""
+                \_ -> given "rubbish" Yaml.bool |> expectFail "Expected bool, got: \"rubbish\" (string)"
             , Test.test "non-boolean number" <|
                 \_ -> given "3" Yaml.bool |> expectFail "Expected bool, got: 3 (int)"
             ]
@@ -82,7 +146,7 @@ suite =
             , Test.test "float as integer" <|
                 \_ -> given "2.1" Yaml.int |> expectFail "Expected int, got: 2.1 (float)"
             , Test.test "rubbish as integer" <|
-                \_ -> given "rubbish" Yaml.int |> expectFail "Expected int, got: \"rubbish\""
+                \_ -> given "rubbish" Yaml.int |> expectFail "Expected int, got: \"rubbish\" (string)"
             , Test.test "empty string as integer" <|
                 \_ -> given "" Yaml.int |> expectFail "Expected int, got: Null"
             , Test.fuzz float "floats" <|
@@ -93,7 +157,7 @@ suite =
             , Test.test "integer as float" <|
                 \_ -> given "0" Yaml.float |> Expect.equal (Ok 0.0)
             , Test.test "rubbish as float" <|
-                \_ -> given "rubbish" Yaml.float |> expectFail "Expected float, got: \"rubbish\""
+                \_ -> given "rubbish" Yaml.float |> expectFail "Expected float, got: \"rubbish\" (string)"
             , Test.test "Empty string as float" <|
                 \_ -> given "" Yaml.float |> expectFail "Expected float, got: Null"
             ]
@@ -105,7 +169,7 @@ suite =
             , Test.test "null as null" <|
                 \_ -> given " null " Yaml.null |> Expect.equal (Ok Maybe.Nothing)
             , Test.test "non-empty string as null" <|
-                \_ -> given "str" Yaml.null |> expectFail "Expected null, got: \"str\""
+                \_ -> given "str" Yaml.null |> expectFail "Expected null, got: \"str\" (string)"
             , Test.test "nullable string" <|
                 \_ -> given "" (Yaml.nullable Yaml.string) |> Expect.equal (Ok Maybe.Nothing)
             , Test.test "nullable bool" <|

@@ -23,6 +23,17 @@ expectFail expected got =
     Expect.equal (Err (Decode.Decoding expected)) got
 
 
+{-| Passes if the `got` is Expect.equal to one of `expected`
+-}
+expectOneOf : List comparable -> comparable -> Expect.Expectation
+expectOneOf expected got =
+    if List.any (\x -> x == got) expected then
+        Expect.pass
+
+    else
+        Expect.fail "expectOneOf"
+
+
 {-| Utility to convery a Result into an Expectation
 -}
 toExpect : Result err Expect.Expectation -> Expect.Expectation

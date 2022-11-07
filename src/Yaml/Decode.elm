@@ -109,7 +109,7 @@ input.
 
     fromString int "4" --> Ok 4
 
-    fromString int "hello" --> Err (Decoding "Expected int, got: \"hello\"")
+    fromString int "hello" --> Err (Decoding "Expected int, got: \"hello\" (string)")
 
 -}
 fromString : Decoder a -> String -> Result Error a
@@ -160,7 +160,7 @@ errorToString e =
     fromString string "hello" --> Ok "hello"
 
     fromString string "hello: 42"
-    --> Err (Decoding "Expected string, got: { hello: 42 (int) }")
+    --> Err (Decoding "Expected string, got: { hello: 42 (int) } (map)")
 
 -}
 string : Decoder String
@@ -183,16 +183,16 @@ string =
     fromString bool "true" --> Ok True
 
     fromString bool "'true'"
-    --> Err (Decoding "Expected bool, got: \"true\"")
+    --> Err (Decoding "Expected bool, got: \"true\" (string)")
 
     fromString bool "42"
     --> Err (Decoding "Expected bool, got: 42 (int)")
 
     fromString bool "hello"
-    --> Err (Decoding "Expected bool, got: \"hello\"")
+    --> Err (Decoding "Expected bool, got: \"hello\" (string)")
 
     fromString bool "hello: 42"
-    --> Err (Decoding "Expected bool, got: { hello: 42 (int) }")
+    --> Err (Decoding "Expected bool, got: { hello: 42 (int) } (map)")
 
 -}
 bool : Decoder Bool
@@ -213,21 +213,21 @@ bool =
     --> Err (Decoding "Expected int, got: True (bool)")
 
     fromString int "'true'"
-    --> Err (Decoding "Expected int, got: \"true\"")
+    --> Err (Decoding "Expected int, got: \"true\" (string)")
 
     fromString int "42"        --> Ok 42
 
     fromString int "'42'"
-    --> Err (Decoding "Expected int, got: \"42\"")
+    --> Err (Decoding "Expected int, got: \"42\" (string)")
 
     fromString int "3.14"
     --> Err (Decoding "Expected int, got: 3.14 (float)")
 
     fromString int "hello"
-    --> Err (Decoding "Expected int, got: \"hello\"")
+    --> Err (Decoding "Expected int, got: \"hello\" (string)")
 
     fromString int "hello: 42"
-    --> Err (Decoding "Expected int, got: { hello: 42 (int) }")
+    --> Err (Decoding "Expected int, got: { hello: 42 (int) } (map)")
 
 -}
 int : Decoder Int
@@ -248,20 +248,20 @@ int =
     --> Err (Decoding "Expected float, got: True (bool)")
 
     fromString float "'true'"
-    --> Err (Decoding "Expected float, got: \"true\"")
+    --> Err (Decoding "Expected float, got: \"true\" (string)")
 
     fromString float "42" --> Ok 42
 
     fromString float "'42'"
-    --> Err (Decoding "Expected float, got: \"42\"")
+    --> Err (Decoding "Expected float, got: \"42\" (string)")
 
     fromString float "3.14" --> Ok 3.14
 
     fromString float "hello"
-    --> Err (Decoding "Expected float, got: \"hello\"")
+    --> Err (Decoding "Expected float, got: \"hello\" (string)")
 
     fromString float "hello: 42"
-    --> Err (Decoding "Expected float, got: { hello: 42 (int) }")
+    --> Err (Decoding "Expected float, got: { hello: 42 (int) } (map)")
 
 -}
 float : Decoder Float
@@ -292,7 +292,7 @@ float =
     --> Err (Decoding "Expected null, got: 42 (int)")
 
     fromString null "hello: 42"
-    --> Err (Decoding "Expected null, got: { hello: 42 (int) }")
+    --> Err (Decoding "Expected null, got: { hello: 42 (int) } (map)")
 
 -}
 null : Decoder (Maybe a)
