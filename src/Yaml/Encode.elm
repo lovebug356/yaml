@@ -275,12 +275,16 @@ list : (a -> Encoder) -> List a -> Encoder
 list encode l =
     Encoder
         (\state ->
-            case state.indent of
-                0 ->
-                    encodeInlineList encode l
+            if List.isEmpty l then
+                "[]"
 
-                _ ->
-                    encodeList encode state l
+            else
+                case state.indent of
+                    0 ->
+                        encodeInlineList encode l
+
+                    _ ->
+                        encodeList encode state l
         )
 
 
@@ -346,12 +350,16 @@ dict : (k -> String) -> (v -> Encoder) -> Dict k v -> Encoder
 dict key val r =
     Encoder
         (\state ->
-            case state.indent of
-                0 ->
-                    encodeInlineDict key val r
+            if Dict.isEmpty r then
+                "{}"
 
-                _ ->
-                    encodeDict key val state r
+            else
+                case state.indent of
+                    0 ->
+                        encodeInlineDict key val r
+
+                    _ ->
+                        encodeDict key val state r
         )
 
 
@@ -419,12 +427,16 @@ record : List ( String, Encoder ) -> Encoder
 record r =
     Encoder
         (\state ->
-            case state.indent of
-                0 ->
-                    encodeInlineRecord r
+            if List.isEmpty r then
+                "{}"
 
-                _ ->
-                    encodeRecord state r
+            else
+                case state.indent of
+                    0 ->
+                        encodeInlineRecord r
+
+                    _ ->
+                        encodeRecord state r
         )
 
 

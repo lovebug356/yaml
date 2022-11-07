@@ -44,7 +44,9 @@ suite =
                         (Encode.toString 0 (Encode.bool x))
             ]
         , Test.describe "Lists"
-            [ Test.fuzz (list int) "inline list of integers" <|
+            [ Test.test "Empty list" <|
+                \_ -> Expect.equal "[]" (Encode.toString 2 (Encode.list Encode.int []))
+            , Test.fuzz (list int) "inline list of integers" <|
                 \xs ->
                     let
                         expected =
@@ -130,7 +132,13 @@ suite =
                         )
             ]
         , Test.describe "Dicts"
-            [ Test.fuzz int "singleton inline record of ints" <|
+            [ Test.test "Empty dict" <|
+                \_ ->
+                    Expect.equal "{}"
+                        (Encode.toString 2
+                            (Encode.dict identity Encode.int Dict.empty)
+                        )
+            , Test.fuzz int "singleton inline record of ints" <|
                 \x ->
                     Expect.equal
                         ("{x: "
@@ -265,7 +273,10 @@ suite =
                         )
             ]
         , Test.describe "Records"
-            [ Test.fuzz int "singleton inline record of int" <|
+            [ Test.test "Empty record" <|
+                \_ ->
+                    Expect.equal "{}" (Encode.toString 2 (Encode.record []))
+            , Test.fuzz int "singleton inline record of int" <|
                 \x ->
                     Expect.equal
                         ("{x: "
@@ -319,12 +330,16 @@ suite =
                             "'" ++ s ++ "'"
 
                         expected =
-                            pairs
-                                |> List.map
-                                    (\( key, val ) ->
-                                        quote key ++ ": " ++ formatFloatOutput val
-                                    )
-                                |> String.join "\n"
+                            if List.isEmpty pairs then
+                                "{}"
+
+                            else
+                                pairs
+                                    |> List.map
+                                        (\( key, val ) ->
+                                            quote key ++ ": " ++ formatFloatOutput val
+                                        )
+                                    |> String.join "\n"
 
                         encoder =
                             Encode.record <|
