@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [2.1.3]
 ### Fixed
 - Updated `elm-explorations/test` to version 2 ([#30](https://github.com/MaybeJustJames/yaml/pull/30)
 - Incorrect encoding of empty collection values in records ([#33](https://github.com/MaybeJustJames/yaml/pull/33))
@@ -53,7 +55,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Some small documentation issues and typos
 
-[Unreleased]: https://github.com/MaybeJustJames/yaml/compare/2.1.2...HEAD
+[Unreleased]: https://github.com/MaybeJustJames/yaml/compare/2.1.3...HEAD
+[2.1.3]: https://github.com/MaybeJustJames/yaml/compare/2.1.2...2.1.3
 [2.1.2]: https://github.com/MaybeJustJames/yaml/compare/2.1.1...2.1.2
 [2.1.1]: https://github.com/MaybeJustJames/yaml/compare/2.1.0...2.1.1
 [2.1.0]: https://github.com/MaybeJustJames/yaml/compare/2.0.2...2.1.0
