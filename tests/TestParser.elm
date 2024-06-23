@@ -182,6 +182,14 @@ suite =
            ccc 
            ]""" <|
                     Ast.List_ [ Ast.String_ "aaa", Ast.String_ "bbb", Ast.String_ "ccc" ]
+        , Test.test "an inline list with strings and trailing comma" <|
+            \_ ->
+                expectValue """[
+           aaa,
+           bbb,
+           ccc,
+           ]""" <|
+                    Ast.List_ [ Ast.String_ "aaa", Ast.String_ "bbb", Ast.String_ "ccc" ]
         , Test.test "an inline list with strings and with new lines and comments" <|
             \_ ->
                 expectValue """[ aaa,# A comment

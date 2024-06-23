@@ -213,10 +213,23 @@ listElementValue indent =
 {-| -}
 listInline : P.Parser Ast.Value
 listInline =
-    P.succeed Ast.List_
+    P.succeed (Ast.List_ << listRemoveNull)
         |. P.chompIf U.isListStart
         |. U.whitespace
         |= listInlineStepOne
+
+
+listRemoveNull : List Ast.Value -> List Ast.Value
+listRemoveNull =
+    List.filterMap
+        (\v ->
+            case v of
+                Ast.Null_ ->
+                    Nothing
+
+                _ ->
+                    Just v
+        )
 
 
 listInlineStepOne : P.Parser (List Ast.Value)

@@ -283,6 +283,17 @@ suite =
                                     sanitised
                                 )
                             )
+            , Test.test "list of strings on multiple lines" <|
+                \_ ->
+                    let
+                        strList =
+                            """[
+                                foo,
+                                bar,
+                            ]"""
+                    in
+                    given strList (Yaml.list Yaml.string)
+                        |> Expect.equal (Ok [ "foo", "bar" ])
             , Test.fuzz (list bool) "list of boolean values" <|
                 \xs ->
                     let
