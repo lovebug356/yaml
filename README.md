@@ -5,12 +5,12 @@
 Convert between type-safe Elm values and [YAML](https://yaml.org).
 
 This is _temporarily_ forked from
-[terezka/yaml](https://package.elm-lang.org/packages/terezka/yaml/latest/) while that package is dormant.
+[MaybeJustJames/yaml](https://package.elm-lang.org/packages/MaybeJustJames/yaml/latest/) which is _temporarily_ forked from [terezka/yaml](https://package.elm-lang.org/packages/terezka/yaml/latest/) while that package is dormant.
 
 ## Install
 
 ```bash
-$ elm install MaybeJustJames/yaml
+$ elm install lovebug356/yaml
 ```
 
 and import the library in an elm file like this
@@ -22,7 +22,7 @@ import Yaml.Encode -- for encoders
 
 ## Documentation
 
-Find the documentation on [Elm's package website](http://package.elm-lang.org/packages/MaybeJustJames/yaml/latest).
+Find the documentation on [Elm's package website](http://package.elm-lang.org/packages/lovebug356/yaml/latest).
 
 ## Example Usage
 
