@@ -1,5 +1,6 @@
 module Yaml.Parser.Util exposing
-    ( doubleQuotes
+    ( block
+    , doubleQuotes
     , either
     , indented
     , isColon
@@ -187,6 +188,39 @@ comment =
 -- STRINGS
 
 
+block : Int -> P.Parser String
+block indent =
+    P.loop [] (blockStep indent)
+
+
+blockStep : Int -> List String -> P.Parser (P.Step (List String) String)
+blockStep indent lines =
+    let
+        multilineString : List String -> String
+        multilineString lines_ =
+            String.join "\n" (List.reverse lines_)
+
+        conclusion line emptyLineCount indent_ =
+            if indent_ > indent then
+                P.Loop
+                    ((line ++ String.repeat emptyLineCount "\n")
+                        :: lines
+                    )
+
+            else
+                P.Done (multilineString (line :: lines))
+    in
+    P.oneOf
+        [ P.succeed conclusion
+            |= characters True (not << isNewLine)
+            |. P.chompIf isNewLine
+            |. spaces
+            |= emptyLines
+            |= P.getCol
+        , P.succeed (P.Done <| multilineString lines)
+        ]
+
+
 {-| -}
 multiline : Int -> P.Parser String
 multiline indent =
@@ -212,7 +246,7 @@ multilineStep indent lines =
     in
     P.oneOf
         [ P.succeed conclusion
-            |= characters (not << isNewLine)
+            |= characters False (not << isNewLine)
             |. P.chompIf isNewLine
             |. spaces
             |= emptyLines
@@ -237,9 +271,18 @@ emptyLinesStep count =
 
 
 {-| -}
-characters : (Char -> Bool) -> P.Parser String
-characters isOk =
+characters : Bool -> (Char -> Bool) -> P.Parser String
+characters withComments isOk =
     let
+        commentParser chars =
+            if not withComments then
+                [ P.succeed (done chars)
+                    |. comment
+                ]
+
+            else
+                []
+
         done chars =
             chars
                 |> List.reverse
@@ -252,15 +295,25 @@ characters isOk =
                 |> P.Loop
 
         step chars =
-            P.oneOf
-                [ P.succeed (done chars)
-                    |. comment
-                , P.succeed ()
-                    |. P.chompIf isOk
-                    |> P.getChompedString
-                    |> P.map (more chars)
-                , P.succeed (done chars)
-                ]
+            if not withComments then
+                P.oneOf
+                    [ P.succeed (done chars)
+                        |. comment
+                    , P.succeed ()
+                        |. P.chompIf isOk
+                        |> P.getChompedString
+                        |> P.map (more chars)
+                    , P.succeed (done chars)
+                    ]
+
+            else
+                P.oneOf
+                    [ P.succeed ()
+                        |. P.chompIf isOk
+                        |> P.getChompedString
+                        |> P.map (more chars)
+                    , P.succeed (done chars)
+                    ]
     in
     P.loop [] step
 
@@ -306,6 +359,9 @@ postProcessString str =
     if isLiteralString str then
         postProcessLiteralString str
 
+    else if isFoldedString str then
+        postProcessFoldedString (String.dropLeft 2 str)
+
     else
         str
             |> String.replace "\n" " "
@@ -318,9 +374,26 @@ postProcessFoldedString str =
         regexFromString : String -> Regex
         regexFromString =
             Regex.fromString >> Maybe.withDefault Regex.never
+
+        regex =
+            if String.left 2 str == ">\n" then
+                regexFromString "\\s+(?!$)"
+
+            else
+                regexFromString "\\s+"
+
+        removedLeading =
+            if String.left 2 str == ">-" then
+                String.dropLeft 2 str
+
+            else if String.left 1 str == ">" then
+                String.dropLeft 1 str
+
+            else
+                str
     in
-    str
-        |> Regex.replace (regexFromString "\\s\\s+")
+    removedLeading
+        |> Regex.replace regex
             (\match ->
                 if String.contains "\n\n" match.match then
                     "\n"
@@ -328,6 +401,14 @@ postProcessFoldedString str =
                 else
                     " "
             )
+
+
+isFoldedString : String -> Bool
+isFoldedString str =
+    str
+        |> String.split "\n"
+        |> List.head
+        |> (==) (Just ">-")
 
 
 isLiteralString : String -> Bool

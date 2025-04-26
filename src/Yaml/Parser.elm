@@ -311,18 +311,28 @@ recordOrString : Int -> Int -> P.Parser Ast.Value
 recordOrString indent indent_ =
     let
         withString string =
-            P.oneOf
-                [ P.succeed (Ast.fromString string)
-                    |. P.end
-                , recordProperty indent_ string
-                , P.succeed (addRemaining string)
+            if string == ">-" then
+                P.succeed (addRemaining string)
                     |= (if indent == 0 then
                             U.remaining
 
                         else
-                            U.multiline indent
+                            U.block indent
                        )
-                ]
+
+            else
+                P.oneOf
+                    [ P.succeed (Ast.fromString string)
+                        |. P.end
+                    , recordProperty indent_ string
+                    , P.succeed (addRemaining string)
+                        |= (if indent == 0 then
+                                U.remaining
+
+                            else
+                                U.multiline indent
+                           )
+                    ]
 
         addRemaining string remaining =
             Ast.fromString <| U.postProcessString (removeComment string ++ remaining)
@@ -335,6 +345,8 @@ recordOrString indent indent_ =
     in
     P.oneOf
         [ quotedString indent_
+
+        -- , foldedBlock indent_
         , P.succeed identity
             |. P.chompIf (U.neither U.isColon U.isNewLine)
             |. P.chompWhile (U.neither U.isColon U.isNewLine)
@@ -345,6 +357,36 @@ recordOrString indent indent_ =
             |> P.getChompedString
             |> P.andThen withString
         ]
+
+
+
+-- foldedBlock : Int -> P.Parser Ast.Value
+-- foldedBlock indent =
+--     let
+--         withString string =
+--             P.oneOf
+--                 [ P.succeed (Ast.fromString string)
+--                     |. P.end
+--                 , recordProperty indent string
+--                 , P.succeed (addRemaining string)
+--                     |= (if indent == 0 then
+--                             U.remaining
+--                         else
+--                             U.multiline indent
+--                        )
+--                 ]
+--     in
+--     P.succeed Ast.fromString
+--         |. P.symbol ">"
+--         |. U.whitespace
+--         |= P.chompWhile (\c -> c /= '\n')
+--         |> P.getChompedString
+--         |> P.andThen withString
+-- |= (if indent == 0 then
+--         U.remaining
+--     else
+--         U.multiline indent
+--    )
 
 
 quotedString : Int -> P.Parser Ast.Value
@@ -457,6 +499,23 @@ recordElementValue indent =
         , ending =
             P.succeed Ast.Null_
         }
+
+
+
+-- filepath: /home/tvermeir/devel/elm/yaml/src/Yaml/Parser.elm
+
+
+{-| Parses folded strings (e.g., `>` in YAML).
+-}
+foldedString : P.Parser Ast.Value
+foldedString =
+    P.succeed identity
+        |= P.symbol ">"
+        |. U.whitespace
+        |. P.chompWhile (\c -> c /= '\n')
+        -- Parse until the end of the line
+        |> P.getChompedString
+        |> P.map (Ast.String_ << String.trim)
 
 
 

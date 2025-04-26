@@ -114,6 +114,12 @@ suite =
             \_ ->
                 expectValue "|\n literal\n \ttext" <|
                     Ast.String_ "literal\n\ttext"
+        , Test.test
+            "a folded multi-line string without trailing new line"
+          <|
+            \_ ->
+                expectValue ">-\n literal\n text\n" <|
+                    Ast.String_ "literal text"
         , Test.test "a record with literal string" <|
             \_ ->
                 expectValue
@@ -135,6 +141,36 @@ suite =
             """
                 <|
                     Ast.Record_ (Dict.fromList [ ( "aaa", Ast.String_ "hello\n\nworld" ) ])
+        , Test.test "a record with folded block" <|
+            \_ ->
+                expectValue
+                    """
+            aaa: >-
+                hello
+                world
+            """
+                <|
+                    Ast.Record_ (Dict.fromList [ ( "aaa", Ast.String_ "hello world" ) ])
+        , Test.test "a record with folded block with hashtags (not comments)" <|
+            \_ ->
+                expectValue
+                    """
+            aaa: >-
+                hello#
+                #world
+            """
+                <|
+                    Ast.Record_ (Dict.fromList [ ( "aaa", Ast.String_ "hello# #world" ) ])
+        , Test.test "a record with folded string with trailing newline" <|
+            \_ ->
+                expectValue
+                    """
+            aaa: >
+                hello
+                world
+            """
+                <|
+                    Ast.Record_ (Dict.fromList [ ( "aaa", Ast.String_ "hello world" ) ])
         , Test.test "a empty inline list" <|
             \_ ->
                 expectValue "[]" <|
