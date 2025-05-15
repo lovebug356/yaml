@@ -311,28 +311,18 @@ recordOrString : Int -> Int -> P.Parser Ast.Value
 recordOrString indent indent_ =
     let
         withString string =
-            if string == ">-" then
-                P.succeed (addRemaining string)
+            P.oneOf
+                [ P.succeed (Ast.fromString string)
+                    |. P.end
+                , recordProperty indent_ string
+                , P.succeed (addRemaining string)
                     |= (if indent == 0 then
                             U.remaining
 
                         else
                             U.block indent
                        )
-
-            else
-                P.oneOf
-                    [ P.succeed (Ast.fromString string)
-                        |. P.end
-                    , recordProperty indent_ string
-                    , P.succeed (addRemaining string)
-                        |= (if indent == 0 then
-                                U.remaining
-
-                            else
-                                U.multiline indent
-                           )
-                    ]
+                ]
 
         addRemaining string remaining =
             Ast.fromString <| U.postProcessString (removeComment string ++ remaining)

@@ -141,6 +141,15 @@ suite =
             """
                 <|
                     Ast.Record_ (Dict.fromList [ ( "aaa", Ast.String_ "hello\n\nworld" ) ])
+        , Test.test "a record with literal string with a hashtag" <|
+            \_ ->
+                expectValue
+                    """
+            aaa: |
+                hello#world
+            """
+                <|
+                    Ast.Record_ (Dict.fromList [ ( "aaa", Ast.String_ "hello#world" ) ])
         , Test.test "a record with folded block" <|
             \_ ->
                 expectValue
