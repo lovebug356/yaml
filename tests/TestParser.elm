@@ -130,7 +130,7 @@ suite =
             """
                 <|
                     Ast.Record_ (Dict.fromList [ ( "aaa", Ast.String_ "hello\nworld" ) ])
-        , Test.test "a record with literal string with empty lines" <|
+        , Test.test "a record with literal string with multiple empty lines" <|
             \_ ->
                 expectValue
                     """
@@ -141,6 +141,39 @@ suite =
             """
                 <|
                     Ast.Record_ (Dict.fromList [ ( "aaa", Ast.String_ "hello\n\nworld" ) ])
+        , Test.test "a record with literal string with multiple empty lines and chomping" <|
+            \_ ->
+                expectValue
+                    """
+            aaa: |-
+                hello
+
+                world
+            """
+                <|
+                    Ast.Record_ (Dict.fromList [ ( "aaa", Ast.String_ "hello\n\nworld" ) ])
+        , Test.test "a record with block string with multiple empty lines" <|
+            \_ ->
+                expectValue
+                    """
+            aaa: >
+                hello
+
+                world
+            """
+                <|
+                    Ast.Record_ (Dict.fromList [ ( "aaa", Ast.String_ "hello\nworld" ) ])
+        , Test.test "a record with block string with multiple empty lines and chomping" <|
+            \_ ->
+                expectValue
+                    """
+            aaa: >-
+                hello
+
+                world
+            """
+                <|
+                    Ast.Record_ (Dict.fromList [ ( "aaa", Ast.String_ "hello\nworld" ) ])
         , Test.test "a record with literal string with a hashtag" <|
             \_ ->
                 expectValue

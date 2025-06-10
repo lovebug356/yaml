@@ -198,7 +198,9 @@ blockStep indent lines =
     let
         multilineString : List String -> String
         multilineString lines_ =
-            String.join "\n" (List.reverse lines_)
+            lines_ 
+                |> List.reverse
+                |> String.join "\n"
 
         conclusion line emptyLineCount indent_ =
             if indent_ > indent then
@@ -408,7 +410,9 @@ isFoldedString str =
     str
         |> String.split "\n"
         |> List.head
-        |> (==) (Just ">-")
+        |> Maybe.map String.trim
+        |> Maybe.map (\line -> line == ">" || line == ">-")
+        |> Maybe.withDefault False
 
 
 isLiteralString : String -> Bool
@@ -416,13 +420,20 @@ isLiteralString str =
     str
         |> String.split "\n"
         |> List.head
-        |> (==) (Just "|")
+        |> Maybe.map String.trim
+        |> Maybe.map (\line -> line == "|" || line == "|-")
+        |> Maybe.withDefault False
 
 
 postProcessLiteralString : String -> String
 postProcessLiteralString str =
-    case String.left 2 str of
-        "|\n" ->
+    let
+        head = String.left 2 str
+
+        hasLiteralHeader =
+            head == "|\n" || head == "|-"
+    in
+    if hasLiteralHeader then
             let
                 content =
                     String.dropLeft 2 str
@@ -430,8 +441,7 @@ postProcessLiteralString str =
             content
                 |> countLeadingSpacesInMultiline
                 |> removeLeadingSpaces content
-
-        _ ->
+    else
             str
 
 

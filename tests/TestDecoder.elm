@@ -31,6 +31,8 @@ sanitiseString s =
                     , 'N'
                     , 'n'
                     , '~'
+                    , '|'
+                    , '>'
                     ]
             then
                 ' '
